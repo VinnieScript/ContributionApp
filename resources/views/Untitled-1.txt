@@ -1,0 +1,47 @@
+document.getElementById('mainDiv').innerHTML="";
+  loadpendingfortoday;
+
+  function loadpendingfortoday(){
+    $.ajax({
+      url:'/loadpending',
+      type:'POST',
+      headers: { 'X-CSRF-TOKEN': $('input[name=_token]').val() },
+      data:{
+        date:'date'
+      },
+      success:function(data){
+       // alert(data);
+        $.each(data, function(key, value) {
+          
+        var radio_with_label = $('<div class="alert alert-secondary" role="alert" > AWAITING APPROVAL TRANSACTION</div><div><table class="table table-dark" style="width:100%"><tr ><td>Fullname</td><td>Identifier/Phonenumber</td><td>Amount</td><td>Action</td></tr><tr><td>'+value.fullname+'</td><td>'+value.identifier+'</td><td>'+value.amount+'</td><td><button class="approved" style="background-color:#003300;color:#fff"><input type="hidden" value="'+value.id+'">Approve</button><button  style="margin-left:5px; background-color:#ff0000;color:#fff" class="declined"><input type="hidden" value="'+value.id+'">Decline</button></td></tr><table></div><br/>');
+
+      $("#mainDiv").append(radio_with_label); // TARGET -> any valid selector container to radios
+      });
+      $(".approved").click(function(){
+        var id = $(this).find('input').attr('value').valueOf();
+        $.ajax({
+      url:'/approvepost',
+      type:'POST',
+      headers: { 'X-CSRF-TOKEN': $('input[name=_token]').val() },
+      beforeSend:function(){
+        $(".approved").attr('disabled','disabled');
+        $(".declined").attr('disabled','disabled');
+        
+      },
+      data:{
+        id:id;
+      },
+      success:function(data){
+        alert(data);
+          //$(".approved").removeAttr('disabled');
+          //$(".declined").removeAttr('disabled');
+          //loadpendingfortoday();
+      
+        
+      },
+      error:function(obj, status, e){
+        alert(e);
+        document.getElementById('mainDiv').innerHTML=e
+      }
+  
+    });
